@@ -1,5 +1,6 @@
 # SublimeTextGRLD
-## Note this is currently a work in progress and is incomplete!
+
+#### Note: This is still early in development and will likely have some bugs. It has only been tested on Windows with a single lua application.
 
 [GRLD](https://github.com/neuoy/GRLD) debugger client integration for Sublime Text.
 
