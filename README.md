@@ -5,4 +5,4 @@
 
 This is forked from the [SublimeTextXdebug](https://github.com/martomo/SublimeTextXdebug) package by [martomo](https://github.com/martomo) and ported to the GRLD protocol.
 
-![SublimeTextXdebug](http://i.imgur.com/2FGYW3P.png)
+![SublimeTextGRLD](http://i.imgur.com/I0H5an6.gif)
