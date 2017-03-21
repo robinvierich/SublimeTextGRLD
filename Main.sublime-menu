@@ -134,13 +134,18 @@
                         "args"   : {"restore" : true}
                     },
                     {
-                        "caption": "Settings - Default",
-                        "command": "grld_settings"
+                        "caption": "Settings",
+                        "command": "edit_settings",
+                        "args"   : {
+                            "base_file" : "${packages}/GRLD/GRLD.sublime-settings"
+                        }
                     },
                     {
-                        "caption": "Settings - User",
-                        "command": "open_file",
-                        "args"   : {"file" : "${packages}/User/GRLD.sublime-settings"}
+                        "caption": "Key Bindings",
+                        "command": "edit_settings",
+                        "args"   : {
+                            "base_file" : "${packages}/GRLD/Default.sublime-keymap"
+                        }
                     }
                 ]
             }
@@ -163,13 +168,18 @@
                         "children":
                         [
                             {
-                                "caption": "Settings – Default",
-                                "command": "grld_settings"
+                                "caption": "Settings",
+                                "command": "edit_settings",
+                                "args"   : {
+                                    "base_file" : "${packages}/GRLD/GRLD.sublime-settings"
+                                }
                             },
                             {
-                                "caption": "Settings – User",
-                                "command": "open_file",
-                                "args": {"file": "${packages}/User/GRLD.sublime-settings"}
+                                "caption": "Key Bindings",
+                                "command": "edit_settings",
+                                "args"   : {
+                                    "base_file" : "${packages}/GRLD/Default.sublime-keymap"
+                                }
                             }
                         ]
                     }
