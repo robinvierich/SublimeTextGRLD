@@ -92,9 +92,8 @@
         "args"   : {"command" : "stepout"}
     },
     {
-        "caption": "GRLD: Breakpoint - Stop",
-        "command": "grld_continue",
-        "args"   : {"command" : "stop"}
+        "caption": "GRLD: Break Now",
+        "command": "grld_break",
     },
     {
         "caption": "GRLD: Breakpoint - Detach",

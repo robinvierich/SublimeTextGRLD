@@ -38,7 +38,7 @@ from .util import get_real_path
 # View module
 from .view import DATA_CONTEXT, DATA_STACK, DATA_WATCH, DATA_COROUTINES, DATA_EVALUATE, TITLE_WINDOW_WATCH, generate_context_output, generate_stack_output, generate_coroutines_output, has_debug_view, render_regions, show_content, show_file, show_panel_content
 
-
+ACTION_BREAK = "action_break"
 ACTION_EVALUATE = "action_evaluate"
 ACTION_EXECUTE = "action_execute"
 ACTION_INIT = "action_init"
@@ -49,7 +49,6 @@ ACTION_USER_EXECUTE = "action_user_execute"
 ACTION_WATCH = "action_watch"
 ACTION_SET_CURRENT_STACK_LEVEL = "action_set_current_stack_level"
 ACTION_SET_SELECTED_THREAD = "action_set_selected_thread"
-
 
 def is_connected(show_status=False):
     """
@@ -165,7 +164,9 @@ class SocketHandler(threading.Thread):
         try:
             S.SESSION_BUSY = True
             # Evaluate
-            if self.action == ACTION_EVALUATE:
+            if self.action == ACTION_BREAK:
+                self.execute_break()
+            elif self.action == ACTION_EVALUATE:
                 self.evaluate(self.get_option('expression'), self.get_option('view'))
             # Execute
             elif self.action == ACTION_EXECUTE:
@@ -202,6 +203,11 @@ class SocketHandler(threading.Thread):
             self.timeout(lambda: connection_error("%s" % e))
         finally:
             S.SESSION_BUSY = False
+
+
+    def execute_break(self):
+        with S.PROTOCOL as protocol:
+            protocol.send('break', 'running')
 
 
     def evaluate(self, expression, view):

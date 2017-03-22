@@ -390,6 +390,16 @@ class GrldSessionStopCommand(sublime_plugin.WindowCommand):
             return True
         return False
 
+class GrldBreakCommand(sublime_plugin.WindowCommand):
+    """
+    Break execution immediately.
+    """
+    def run(self):
+        async_session = session.SocketHandler(session.ACTION_BREAK)
+        async_session.start()
+
+    def is_enabled(self):
+        return session.is_connected()
 
 class GrldExecuteCommand(sublime_plugin.WindowCommand):
     """
@@ -418,6 +428,7 @@ class GrldContinueCommand(sublime_plugin.WindowCommand):
     commands[grld.STEP_OVER] = 'Step Over'
     commands[grld.STEP_IN] = 'Step In'
     commands[grld.STEP_OUT] = 'Step Out'
+    commands[grld.BREAK] = 'Break'
 
     command_index = H.dictionary_keys(commands)
     command_options = H.dictionary_values(commands)
