@@ -263,7 +263,7 @@ class Protocol(object):
         t = time.clock()
         if not hasattr(self, 'last_check_time') or self.last_check_time - t >= 1: # need to rate-limit this so we don't flood the network
             self.last_check_time = t
-            self._send('', 'ka') # keep-alive channel
+            self.send('', 'ka') # keep-alive channel
         
 
     @assert_locked
