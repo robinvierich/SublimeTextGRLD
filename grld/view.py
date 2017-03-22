@@ -861,7 +861,7 @@ def toggle_stack(view):
         if point.size() > 3 and sublime.score_selector(view.scope_name(point.a), 'grld.output.stack.entry'):
             # Get fileuri and line number from selected line in view
             line = view.substr(view.line(point))
-            pattern = re.compile('^(\[\d+\])\s*(?P<fileuri>.*\..*)(\s*:.*?(?P<lineno>\d+))\s*(\((.*?):.*\)|$)')
+            pattern = re.compile('^(\[\d+\])\s*(?P<fileuri>.*\..*)(\s*:.*?(?P<lineno>\d+)).*(\((.*?):.*\)|$)')
             match = pattern.match(line)
             # Show file when it's a valid fileuri
             if match and match.group('fileuri'):

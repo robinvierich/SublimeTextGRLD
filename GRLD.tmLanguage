@@ -137,7 +137,7 @@
 				</dict>
 			</dict>
 			<key>match</key>
-			<string>^(\[\d+\])\s*(.*)(\..*)(\s*:.*?\d+)\s*(\((.*?):.*\)|$)</string>
+			<string>^(\[\d+\])\s*(.*)(\..*)(\s*:.*?\d+).*(\((.*?):.*\)|$)</string>
 			<key>name</key>
 			<string>grld.output.stack.entry</string>
 		</dict>
