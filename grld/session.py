@@ -539,7 +539,8 @@ class SocketHandler(threading.Thread):
             current_thread = protocol.read()
 
         # GRLD only passes back co-routines that are NOT 'main'. So, if current_thread is not in the list, then 'main' is the current thread.
-        if current_thread not in coroutines_dict.values():
+        coroutine_ids = (coroutine_descriptor['id'] for coroutine_descriptor in coroutines_dict.values())
+        if current_thread not in coroutine_ids:
             current_thread = 'main'
 
         self.current_thread = current_thread
