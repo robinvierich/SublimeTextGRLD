@@ -107,9 +107,10 @@ def update_socket_loop():
         try:
             protocol.update()
         except ProtocolConnectionException as e:
-            sublime.set_timeout(lambda: sublime.error_message('The connection to client was lost. Restarting SublimeTextGRLD server.'), 0)
-            sublime.set_timeout(lambda: sublime.active_window().send_command('grld_session_restart'), 0)
             return
+        #    sublime.set_timeout(lambda: sublime.error_message('The connection to client was lost. Restarting SublimeTextGRLD server.'), 0)
+        #    sublime.set_timeout(lambda: sublime.active_window().send_command('grld_session_restart'), 0)
+        #    return
 
     sublime.set_timeout_async(update_socket_loop, 100)
 
