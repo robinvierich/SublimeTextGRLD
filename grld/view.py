@@ -144,7 +144,7 @@ def generate_context_output(context, indent=0, values_only=False, multiline=True
         if variable['value'] and len(variable['value']) > 0:
             value = variable['value'].replace("\r\n", "\n").replace("\n", " ")
 
-        if multiline:
+        if multiline or has_children:
             property_text += '\n'
         else:
             if not is_last_element:
@@ -861,7 +861,7 @@ def toggle_stack(view):
         if point.size() > 3 and sublime.score_selector(view.scope_name(point.a), 'grld.output.stack.entry'):
             # Get fileuri and line number from selected line in view
             line = view.substr(view.line(point))
-            pattern = re.compile('^(\[\d+\])\s*(?P<fileuri>.*\..*)(\s*:.*?(?P<lineno>\d+))\s*(\((.*?):.*\)|$)')
+            pattern = re.compile('^(\[\d+\])\s*(?P<fileuri>.*\..*)(\s*:.*?(?P<lineno>\d+)).*(\((.*?):.*\)|$)')
             match = pattern.match(line)
             # Show file when it's a valid fileuri
             if match and match.group('fileuri'):

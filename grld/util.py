@@ -65,6 +65,7 @@ def get_real_path(uri, server=False):
     if isinstance(path_mapping, dict):
 
         found_path_mapping = False
+        found_parent_path_mapping = False
         
         # Go through path mappings
         for server_path, local_path in path_mapping.items():
@@ -84,8 +85,15 @@ def get_real_path(uri, server=False):
                     found_path_mapping = True
                     break
 
+            
+            if not found_path_mapping:
+                if server:
+                    found_parent_path_mapping = server_path in uri
+                else:
+                    found_parent_path_mapping = local_path in uri
+
         # "=[C]" is a special case url for lua C code
-        if not found_path_mapping and uri != '=[C]':
+        if not found_path_mapping and not found_parent_path_mapping and uri != '=[C]':
             server_or_local = 'server' if server else 'local'
             sublime.set_timeout(lambda: sublime.error_message("GRLD: No {} path mapping defined for path {}. It's likely that your breakpoints for this file won't be hit! You can set up path mappings in the SublimeTextGRLD package settings.".format(server_or_local, uri)), 0)
     else:

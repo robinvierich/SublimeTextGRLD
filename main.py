@@ -279,7 +279,7 @@ class GrldSessionStartCommand(sublime_plugin.WindowCommand):
     def run(self, restart=False):
         # Define new session with DBGp protocol
 
-        S.PROTOCOL = protocol.Protocol()
+        S.PROTOCOL = protocol.Protocol(lambda exception: self.on_connection_lost(exception))
         S.SESSION_BUSY = False
         S.BREAKPOINT_EXCEPTION = None
         S.BREAKPOINT_ROW = None
@@ -295,6 +295,11 @@ class GrldSessionStartCommand(sublime_plugin.WindowCommand):
 
         # Start thread which will run method that listens for response on configured port
         threading.Thread(target=self.listen).start()
+
+    # note: may be called from a separate thread (not main thread)
+    def on_connection_lost(self, exception):
+        sublime.set_timeout(lambda: self.window.run_command('grld_session_restart'), 0)
+        sublime.set_timeout(lambda: sublime.error_message('The connection to client was lost. Restarted SublimeTextGRLD server.'), 0)
 
     def listen(self):
         # Start listening for response from debugger engine

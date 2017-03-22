@@ -117,7 +117,7 @@ class Protocol(object):
     # Maximum amount of data to be received at once by socket
     read_size = 1024
 
-    def __init__(self, on_break_cmd_cb=None, on_synchronize_cmd_cb=None):
+    def __init__(self, on_connection_lost_cb=None):
         # Set port number to listen for response
         self.port = get_value(S.KEY_PORT, S.DEFAULT_PORT)
 
@@ -129,24 +129,31 @@ class Protocol(object):
         self.locked = 0
         self.listening_canceled_event = threading.Event()
 
+        self.on_connection_lost_cb = on_connection_lost_cb
+
         with self as s:
             s.clear()
+
 
     def __enter__(self):
         self.lock.acquire()
         self.locked += 1
         return self
 
+
     def __exit__(self, err_type, error_obj, traceback):
         self.lock.release()
         self.locked = max(self.locked - 1, 0)
 
+
     def is_locked(self):
         return self.locked > 0
+
 
     def register_command_cb(self, cmd_name, cb):
         cbs = self.command_cbs.setdefault(cmd_name, [])
         cbs.append(cb)
+
 
     def transaction_id():
         """
@@ -165,6 +172,7 @@ class Protocol(object):
 
     # Transaction ID property
     transaction_id = property(**transaction_id())
+
 
     @assert_locked
     def clear(self):
@@ -186,8 +194,10 @@ class Protocol(object):
 
         self.listening_canceled_event.clear()
 
+
     def stop_listening_for_incoming_connections(self):
         self.listening_canceled_event.set()
+
 
     def unescape(self, string):
         """
@@ -217,6 +227,7 @@ class Protocol(object):
             return text
         return re.sub("&#?\w+;", convert, string)
 
+
     @assert_locked
     def is_command(self, message):
         if not message:
@@ -225,6 +236,7 @@ class Protocol(object):
         deserialized_message = deserialize(message)
 
         return deserialized_message in ('break', 'synchronize')
+
 
     @assert_locked
     def handle_command(self, message):
@@ -246,13 +258,22 @@ class Protocol(object):
 
 
     @assert_locked
+    def check_connection(self):
+        self.send('', 'ka') # keep-alive channel
+        
+
+
+    @assert_locked
     def update(self):
+        self.check_connection()
+
         # read in messages (these might be commands which will be handled immediately)
         message = self.read_next_message(async=True)
 
         # if it's not a command, we need to keep it around for the next read request
         if message:
             self.messages.append(message)
+            
 
     @assert_locked
     def parse_grld_message(self, message):
@@ -329,6 +350,7 @@ class Protocol(object):
 
         return message
 
+
     @assert_locked
     def read(self, return_string=False):
         if len(self.messages):
@@ -341,13 +363,18 @@ class Protocol(object):
         else:
             return deserialize(message)
 
+
     @assert_locked
     def send(self, data, channel='default'):
-        self.update()
         s_data = serialize(data)
         formatted_data = channel + '\n' + str(len(s_data)) + '\n' + s_data
 
-        self.socket.send(H.data_write(formatted_data))
+        try:
+            self.socket.send(H.data_write(formatted_data))
+        except BaseException as e:
+            self.socket.close()
+            if self.on_connection_lost_cb:
+                self.on_connection_lost_cb(e)
 
     @assert_locked
     def listen(self):
@@ -397,9 +424,6 @@ class Protocol(object):
             return self.socket
         else:
             raise ProtocolConnectionException('Could not create socket server.')
-
-
-
 
 
 class ProtocolException(Exception):

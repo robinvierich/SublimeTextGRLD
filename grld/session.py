@@ -107,9 +107,10 @@ def update_socket_loop():
         try:
             protocol.update()
         except ProtocolConnectionException as e:
-            sublime.set_timeout(lambda: sublime.error_message('The connection to client was lost. Restarting SublimeTextGRLD server.'), 0)
-            sublime.set_timeout(lambda: sublime.active_window().send_command('grld_session_restart'), 0)
             return
+        #    sublime.set_timeout(lambda: sublime.error_message('The connection to client was lost. Restarting SublimeTextGRLD server.'), 0)
+        #    sublime.set_timeout(lambda: sublime.active_window().send_command('grld_session_restart'), 0)
+        #    return
 
     sublime.set_timeout_async(update_socket_loop, 100)
 
@@ -538,7 +539,8 @@ class SocketHandler(threading.Thread):
             current_thread = protocol.read()
 
         # GRLD only passes back co-routines that are NOT 'main'. So, if current_thread is not in the list, then 'main' is the current thread.
-        if current_thread not in coroutines_dict.values():
+        coroutine_ids = (coroutine_descriptor['id'] for coroutine_descriptor in coroutines_dict.values())
+        if current_thread not in coroutine_ids:
             current_thread = 'main'
 
         self.current_thread = current_thread
