@@ -144,7 +144,7 @@ def generate_context_output(context, indent=0, values_only=False, multiline=True
         if variable['value'] and len(variable['value']) > 0:
             value = variable['value'].replace("\r\n", "\n").replace("\n", " ")
 
-        if multiline:
+        if multiline or has_children:
             property_text += '\n'
         else:
             if not is_last_element:
