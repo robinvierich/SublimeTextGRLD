@@ -3,6 +3,7 @@ import select
 import threading
 import socket
 import sys
+import time
 
 # Helper module
 try:
@@ -259,9 +260,11 @@ class Protocol(object):
 
     @assert_locked
     def check_connection(self):
-        self.send('', 'ka') # keep-alive channel
+        t = time.clock()
+        if not hasattr(self, 'last_check_time') or self.last_check_time - t >= 1: # need to rate-limit this so we don't flood the network
+            self.last_check_time = t
+            self._send('', 'ka') # keep-alive channel
         
-
 
     @assert_locked
     def update(self):
@@ -376,6 +379,7 @@ class Protocol(object):
             if self.on_connection_lost_cb:
                 self.on_connection_lost_cb(e)
 
+
     @assert_locked
     def listen(self):
         """
@@ -388,6 +392,7 @@ class Protocol(object):
             # Configure socket server
             try:
                 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                server.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
                 server.settimeout(1)
                 server.bind(('', self.port))
                 server.listen(1)
@@ -409,6 +414,7 @@ class Protocol(object):
             if self.socket:
                 self.connected = True
                 self.socket.settimeout(None)
+                self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
             else:
                 self.connected = False
                 self.listening = False
