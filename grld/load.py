@@ -9,7 +9,7 @@ except:
     import settings as S
 
 # Load modules
-from .view import DATA_BREAKPOINT, DATA_CONTEXT, DATA_STACK, DATA_WATCH, TITLE_WINDOW_BREAKPOINT, TITLE_WINDOW_CONTEXT, TITLE_WINDOW_STACK, TITLE_WINDOW_WATCH, has_debug_view, render_regions, show_content
+from .view import DATA_BREAKPOINT, DATA_CONTEXT, DATA_STACK, DATA_WATCH, DATA_COROUTINES, DATA_EVALUATE, DATA_ICONS, TITLE_WINDOW_BREAKPOINT, TITLE_WINDOW_CONTEXT, TITLE_WINDOW_STACK, TITLE_WINDOW_WATCH, TITLE_WINDOW_COROUTINES, TITLE_WINDOW_EVALUATE, TITLE_WINDOW_ICONS, has_debug_view, render_regions, show_content
 from .util import load_breakpoint_data, load_watch_data
 from .log import clear_output, debug, info
 from .config import get_value, get_window_value, set_window_value, load_package_values, load_project_values
@@ -50,6 +50,12 @@ def grld():
         show_content(DATA_STACK)
     if has_debug_view(TITLE_WINDOW_WATCH):
         show_content(DATA_WATCH)
+    if has_debug_view(TITLE_WINDOW_COROUTINES):
+        show_content(DATA_COROUTINES)
+    if has_debug_view(TITLE_WINDOW_EVALUATE):
+        show_content(DATA_EVALUATE)
+    if has_debug_view(TITLE_WINDOW_ICONS):
+        show_content(DATA_ICONS)
 
     sublime.active_window().run_command('grld_layout', {'restore': True})
 

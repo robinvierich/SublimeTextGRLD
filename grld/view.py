@@ -35,6 +35,7 @@ DATA_STACK = 'stack'
 DATA_WATCH = 'watch'
 DATA_COROUTINES = 'coroutines'
 DATA_EVALUATE = 'evaluate'
+DATA_ICONS = 'icons'
 
 TITLE_WINDOW_BREAKPOINT = "Breakpoints"
 TITLE_WINDOW_CONTEXT = "Context"
@@ -42,6 +43,7 @@ TITLE_WINDOW_STACK = "Stack"
 TITLE_WINDOW_WATCH = "Watch"
 TITLE_WINDOW_COROUTINES = "Coroutines"
 TITLE_WINDOW_EVALUATE = "Evaluate"
+TITLE_WINDOW_ICONS = "Icons"
 
 
 def close_debug_windows():
@@ -301,6 +303,8 @@ def get_debug_index(name=None):
     coroutines_index = get_value(S.KEY_COROUTINES_INDEX, 0)
     evaluate_group = get_value(S.KEY_EVALUATE_GROUP, -1)
     evaluate_index = get_value(S.KEY_EVALUATE_INDEX, 0)
+    icons_group = get_value(S.KEY_ICONS_GROUP, -1)
+    icons_index = get_value(S.KEY_ICONS_INDEX, 0)
 
     # Create list with all debug views and sort by group/index
     debug_list = []
@@ -310,6 +314,7 @@ def get_debug_index(name=None):
     debug_list.append((watch_group, watch_index, TITLE_WINDOW_WATCH))
     debug_list.append((coroutines_group, coroutines_index, TITLE_WINDOW_COROUTINES))
     debug_list.append((evaluate_group, evaluate_index, TITLE_WINDOW_EVALUATE))
+    debug_list.append((icons_group, icons_index, TITLE_WINDOW_ICONS))
     debug_list.sort(key=operator.itemgetter(0,1))
 
     # Recalculate group/index position within boundaries of active window
@@ -378,7 +383,8 @@ def is_debug_view(view):
         view.name() == TITLE_WINDOW_STACK or \
         view.name() == TITLE_WINDOW_WATCH or \
         view.name() == TITLE_WINDOW_COROUTINES or \
-        view.name() == TITLE_WINDOW_EVALUATE
+        view.name() == TITLE_WINDOW_EVALUATE or \
+        view.name() == TITLE_WINDOW_ICONS
 
 
 def set_layout(layout):
@@ -458,6 +464,8 @@ def show_content(data, content=None):
     elif data == DATA_EVALUATE:
         title = TITLE_WINDOW_EVALUATE
         read_only = False
+    elif data == DATA_ICONS:
+        title = TITLE_WINDOW_ICONS
     else:
         return
 
@@ -641,7 +649,7 @@ def show_at_row(view, row=None):
             pass
 
 
-def rows_to_region(rows):
+def rows_to_region(rows, view=None):
     """
     Convert rows (line numbers) to a region (selection/cursor position).
 
@@ -650,7 +658,7 @@ def rows_to_region(rows):
     """
 
     # Get current active view
-    view = sublime.active_window().active_view()
+    view = view or sublime.active_window().active_view()
     # Unable to convert rows to regions when no view available
     if view is None:
         return
@@ -727,30 +735,43 @@ def region_to_rows(region=None, filter_empty=False):
     return rows
 
 
-def render_regions(view=None):
+def render_regions(code_view=None):
+     # Get current active view
+    if code_view is None:
+        code_view = sublime.active_window().active_view()
+    # Unable to set regions when no view available
+    if code_view is None:
+        return
+
+    icons_view = None
+    for view in sublime.active_window().views():
+        if view.name() == TITLE_WINDOW_ICONS:
+            icons_view = view
+            break
+
+    if icons_view is None:
+        return
+
+    icons_view.run_command('grld_render_icons', {'code_view_id': code_view.id()})
+
+def _render_regions(code_view, icons_view):
     """
     Set breakpoint/current line marker(s) for current active view.
 
     Note: View rendering conflict when using same icon for different scopes in add_regions().
     """
-    # Get current active view
-    if view is None:
-        view = sublime.active_window().active_view()
-    # Unable to set regions when no view available
-    if view is None:
-        return
 
     # Do no set regions if view is empty or still loading
-    if view.size() == 0 or view.is_loading():
+    if code_view.size() == 0 or code_view.is_loading():
         return
 
     # Remove all markers to avoid marker conflict
-    view.erase_regions(S.REGION_KEY_BREAKPOINT)
-    view.erase_regions(S.REGION_KEY_CURRENT)
-    view.erase_regions(S.REGION_KEY_DISABLED)
+    icons_view.erase_regions(S.REGION_KEY_BREAKPOINT)
+    icons_view.erase_regions(S.REGION_KEY_CURRENT)
+    icons_view.erase_regions(S.REGION_KEY_DISABLED)
 
-    # Get filename of current view and check if is a valid filename
-    filename = view.file_name()
+    # Get filename of current code_view and check if is a valid filename
+    filename = code_view.file_name()
     if not filename:
         return
 
@@ -788,13 +809,13 @@ def render_regions(view=None):
                 disabled_rows.remove(S.BREAKPOINT_ROW['lineno'])
             # Set current line marker
             if icon_current:
-                view.add_regions(S.REGION_KEY_CURRENT, rows_to_region(S.BREAKPOINT_ROW['lineno']), S.REGION_SCOPE_CURRENT, icon_current, sublime.HIDDEN)
+                icons_view.add_regions(S.REGION_KEY_CURRENT, rows_to_region(S.BREAKPOINT_ROW['lineno'], icons_view), S.REGION_SCOPE_CURRENT, icon_current, sublime.HIDDEN)
 
     # Set breakpoint marker(s)
     if breakpoint_rows and icon_enabled:
-        view.add_regions(S.REGION_KEY_BREAKPOINT, rows_to_region(breakpoint_rows), S.REGION_SCOPE_BREAKPOINT, icon_enabled, sublime.HIDDEN)
+        icons_view.add_regions(S.REGION_KEY_BREAKPOINT, rows_to_region(breakpoint_rows, icons_view), S.REGION_SCOPE_BREAKPOINT, icon_enabled, sublime.HIDDEN)
     if disabled_rows and icon_disabled:
-        view.add_regions(S.REGION_KEY_DISABLED, rows_to_region(disabled_rows), S.REGION_SCOPE_BREAKPOINT, icon_disabled, sublime.HIDDEN)
+        icons_view.add_regions(S.REGION_KEY_DISABLED, rows_to_region(disabled_rows, icons_view), S.REGION_SCOPE_BREAKPOINT, icon_disabled, sublime.HIDDEN)
 
 
 def toggle_breakpoint(view):

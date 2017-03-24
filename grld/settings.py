@@ -37,6 +37,8 @@ KEY_COROUTINES_GROUP = "coroutines_group"
 KEY_COROUTINES_INDEX = "coroutines_index"
 KEY_EVALUATE_GROUP = "evaluate_group"
 KEY_EVALUATE_INDEX = "evaluate_index"
+KEY_ICONS_GROUP = "icons_group"
+KEY_ICONS_INDEX = "icons_index"
 
 
 KEY_BREAKPOINT_CURRENT = 'breakpoint_current'

@@ -41,9 +41,17 @@ try:
 except:
     pass
 
+def refresh_views_loop():
+    if not S.PROTOCOL:
+        return
+
+    view = sublime.active_window().active_view()
+    if not V.is_debug_view(view):
+        V.render_regions(view)
+    sublime.set_timeout(refresh_views_loop, 100)
 
 # Initialize package
-sublime.set_timeout(lambda: load.grld(), 1000)
+sublime.set_timeout(lambda: load.grld(), 100)
 
 # Define event listener for view(s)
 class EventListener(sublime_plugin.EventListener):
@@ -53,17 +61,9 @@ class EventListener(sublime_plugin.EventListener):
         if filename and filename in S.SHOW_ROW_ONLOAD:
             V.show_at_row(view, S.SHOW_ROW_ONLOAD[filename])
             del S.SHOW_ROW_ONLOAD[filename]
-        # Render breakpoint markers
-        sublime.set_timeout(lambda: V.render_regions(view), 0)
-
-    def on_activated(self, view):
-        # Render breakpoint markers
-        V.render_regions(view)
 
     def on_post_save(self, view):
         filename = view.file_name()
-        # Render breakpoint markers
-        V.render_regions(view)
         # Update config when settings file or sublime-project has been saved
         if filename and (filename.endswith(S.FILE_PACKAGE_SETTINGS) or filename.endswith('.sublime-project')):
             config.load_package_values()
@@ -80,8 +80,7 @@ class EventListener(sublime_plugin.EventListener):
             V.toggle_stack(view)
         elif view.name() == V.TITLE_WINDOW_WATCH:
             V.toggle_watch(view)
-        else:
-            pass
+
 
     def on_query_context(self, view, key, operator, operand, match_all):
         if not session.is_connected():
@@ -153,8 +152,6 @@ class GrldBreakpointCommand(sublime_plugin.TextCommand):
                     async_session = session.SocketHandler(session.ACTION_SET_BREAKPOINT, filename=filename, lineno=row, expression=expression)
                     async_session.start()
 
-        # Render breakpoint markers
-        V.render_regions()
 
         # Update breakpoint list
         try:
@@ -166,6 +163,36 @@ class GrldBreakpointCommand(sublime_plugin.TextCommand):
         # Save breakpoint data to file
         util.save_breakpoint_data()
 
+class GrldRenderIconsCommand(sublime_plugin.TextCommand):
+    def run(self, edit, code_view_id=None):
+        if not code_view_id:
+            return
+
+        code_view = None
+        for view in self.view.window().views():
+            if view.id() == code_view_id:
+                code_view = view
+                break
+        
+        if not code_view:
+            return
+
+        num_code_lines = len(code_view.lines(sublime.Region(0, code_view.size())))
+        
+        newlines_str = ' \n' * (num_code_lines - 1)
+
+        self.view.set_read_only(False)
+        num_icon_lines = len(self.view.lines(sublime.Region(0, self.view.size())))
+        if num_icon_lines != num_code_lines - 1:
+            self.view.erase(edit, sublime.Region(0, self.view.size()))
+            self.view.insert(edit, 0, newlines_str)
+        else:
+            self.view.replace(edit, sublime.Region(0, self.view.size()), newlines_str)
+        self.view.set_read_only(True)
+
+        pos = code_view.viewport_position()
+        sublime.set_timeout(lambda: self.view.set_viewport_position(pos, False), 0)
+        sublime.set_timeout(lambda: V._render_regions(code_view, self.view), 0)
 
 class GrldConditionalBreakpointCommand(sublime_plugin.TextCommand):
     """
@@ -277,9 +304,7 @@ class GrldSessionStartCommand(sublime_plugin.WindowCommand):
     Start GRLD session, listen for request response from debugger engine.
     """
     def run(self, restart=False):
-        # Define new session with DBGp protocol
-
-        S.PROTOCOL = protocol.Protocol(lambda exception: self.on_connection_lost(exception))
+        S.PROTOCOL = protocol.Protocol(lambda e: self.on_connection_lost(e))
         S.SESSION_BUSY = False
         S.BREAKPOINT_EXCEPTION = None
         S.BREAKPOINT_ROW = None
@@ -295,6 +320,7 @@ class GrldSessionStartCommand(sublime_plugin.WindowCommand):
 
         # Start thread which will run method that listens for response on configured port
         threading.Thread(target=self.listen).start()
+        sublime.set_timeout(refresh_views_loop, 0)
 
     # note: may be called from a separate thread (not main thread)
     def on_connection_lost(self, exception):
@@ -308,7 +334,7 @@ class GrldSessionStartCommand(sublime_plugin.WindowCommand):
 
         # On connect run method which handles connection
         if S.PROTOCOL and S.PROTOCOL.connected:
-            sublime.set_timeout(self.connected, 0)
+            self.connected()
 
     def connected(self):
         sublime.set_timeout(lambda: sublime.status_message('GRLD: Connected'), 100)
@@ -353,8 +379,10 @@ class GrldSessionStopCommand(sublime_plugin.WindowCommand):
             S.PROTOCOL.stop_listening_for_incoming_connections()
             with S.PROTOCOL as protocol:
                 protocol.clear()
-        except:
+        except BaseException as e:
+            print(e)
             pass
+
         finally:
             S.PROTOCOL = None
             S.SESSION_BUSY = False
@@ -375,8 +403,6 @@ class GrldSessionStopCommand(sublime_plugin.WindowCommand):
                 self.window.run_command('grld_layout', {'restore': True})
         else:
             self.window.run_command('grld_layout')
-        # Render breakpoint markers
-        V.render_regions()
 
     def is_enabled(self):
         if S.PROTOCOL:
@@ -690,6 +716,12 @@ class GrldLayoutCommand(sublime_plugin.WindowCommand):
             if v.name() == V.TITLE_WINDOW_EVALUATE:
                 evaluate_content = v.substr(sublime.Region(0, v.size()))
         V.show_content(V.DATA_EVALUATE, evaluate_content)
+
+        icons_content = ''
+        for v in window.views():
+            if v.name() == V.TITLE_WINDOW_ICONS:
+                icons_content = v.substr(sublime.Region(0, v.size()))
+        V.show_content(V.DATA_ICONS, icons_content)
 
         panel = window.get_output_panel('grld')
         panel.run_command("grld_view_update")

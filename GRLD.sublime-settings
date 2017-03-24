@@ -12,6 +12,9 @@
     "path_mapping": {
     },
 
+	// when showing paths, trim based on path_mapping values (false means output full absolute paths)
+	"trim_local_paths_with_mappings": false,
+
     // An IDE key is used to identify with debugger engine
     // when Sublime Text will start or stop a debugging session.
     //
@@ -69,12 +72,15 @@
 
     // Window layout that is being used when debugging.
     "debug_layout" : {
-        "cols": [0.0, 0.15, 0.6, 1.0],
+        "cols": [0.0, 0.05, 0.15, 0.6, 1.0],
         "rows": [0.0, 0.7, 1.0],
-        "cells": [[0, 0, 3, 1], [0, 1, 1, 2], [1, 1, 2, 2], [2, 1, 3, 2]]
+		//            main       coroutines      context        stack         icons
+        "cells": [[1, 0, 4, 1], [0, 1, 2, 2], [2, 1, 3, 2], [3, 1, 4, 2], [0, 0, 1, 1]]
     },
 
     // Group and index positions for debug views.
+	//   group: index into "cells" array above where the tab should show up
+	//   index: tab index within group (for tab ordering)
     "breakpoint_group": 3,
     "breakpoint_index": 1,
     "context_group": 2,
@@ -87,6 +93,8 @@
     "coroutines_index": 0,
 	"evaluate_group": 2,
     "evaluate_index": 2,
+	"icons_index": 0,
+	"icons_group": 4,
 
     // Custom gutter icons for indicating current line or enabled/disabled breakpoints.
     //
@@ -116,5 +124,5 @@
 
 	// Disables sublime linter gutter icons.
 	// This is necessary to ensure gutter icons (current line + breakpoints) are visible
-	"disable_sublime_linter_gutter": true
+	"disable_sublime_linter_gutter": true,
 }
