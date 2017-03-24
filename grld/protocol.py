@@ -1,3 +1,4 @@
+import sublime
 import re
 import select
 import threading
@@ -99,8 +100,7 @@ def deserialize( s ):
         ds = convert_lua_table_str_to_python_dict_str(ds)
         result = eval(ds)
         return result
-    except BaseException:
-        e = sys.exc_info()[1]
+    except BaseException as e:
         raise ProtocolException("Error deserializing message \n{}\n{}".format(s, e))
 
 def assert_locked(func):
@@ -126,6 +126,7 @@ class Protocol(object):
 
         self.command_cbs = {}
 
+        self.socket = None
         self.lock = threading.RLock()
         self.locked = 0
         self.listening_canceled_event = threading.Event()
@@ -184,10 +185,11 @@ class Protocol(object):
         self.connected = False
         self.listening = False
         del self.transaction_id
-        try:
+
+        if self.socket:
             self.socket.close()
-        except:
-            pass
+            
+
         self.socket = None
 
         #self.lock = threading.RLock()
@@ -337,18 +339,31 @@ class Protocol(object):
         else:
             return deserialize(message)
 
-
     @assert_locked
     def send(self, data, channel='default'):
         s_data = serialize(data)
         formatted_data = channel + '\n' + str(len(s_data)) + '\n' + s_data
 
+        exception = None
         try:
-            self.socket.send(H.data_write(formatted_data))
-        except BaseException as e:
-            self.socket.close()
-            if self.on_connection_lost_cb:
-                self.on_connection_lost_cb(e)
+            sent = self.socket.send(H.data_write(formatted_data))
+        except socket.error as e:
+            sent = 0
+            exception = e
+
+        if sent == 0:
+            self.disconnect(exception)
+    
+
+    def disconnect(self, exception):
+        try:
+            self.socket.shutdown(2)
+        except OSError:
+            pass # already closed?
+
+        self.socket.close()
+        if self.on_connection_lost_cb:
+            sublime.set_timeout(lambda: self.on_connection_lost_cb(exception))
 
 
     @assert_locked
@@ -380,6 +395,8 @@ class Protocol(object):
                     self.listening = False
                 except socket.timeout:
                     pass
+                except BaseException as e:
+                    raise ProtocolConnectionException(e)
 
             # Check if a connection has been made
             if self.socket:
@@ -393,8 +410,9 @@ class Protocol(object):
             # Close socket server
             try:
                 server.close()
-            except:
-                pass
+            except BaseException as e:
+                raise ProtocolConnectionException(e)
+
             server = None
 
             # Return socket connection
