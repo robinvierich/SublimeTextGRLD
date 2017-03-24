@@ -23,6 +23,11 @@ try:
 except:
     import dbgp
 
+try:
+    from . import grld
+except:
+    import grld
+
 # Config module
 from .config import get_value
 
@@ -68,49 +73,36 @@ def is_connected(show_status=False):
 def is_execution_broken():
     return S.BREAKPOINT_ROW or S.BREAKPOINT_EXCEPTION
 
-def connection_error(message):
+def connection_error(exception):
     """
     Template for showing error message on connection error/loss.
 
     Keyword arguments:
     message -- Exception/reason of connection error/loss.
     """
-    sublime.error_message("Please restart GRLD debugging session.\nDisconnected from GRLD debugger engine.\n" + message)
     info("Connection lost with debugger engine.")
     debug(message)
     # Reset connection
-    try:
-        with S.PROTOCOL as protocol:
-            protocol.clear()
-    except:
-        pass
-    finally:
-        S.PROTOCOL = None
-        S.SESSION_BUSY = False
-        S.BREAKPOINT_EXCEPTION = None
-        S.BREAKPOINT_ROW = None
-        S.BREAKPOINT_RUN = None
-        S.CONTEXT_DATA.clear()
-        async_session = SocketHandler(ACTION_WATCH)
-        async_session.start()
-    # Reset layout
-    sublime.active_window().run_command('grld_layout')
+    
+    with S.PROTOCOL as protocol:
+        protocol.disconnect(exception)
+        #protocol.clear()
+
     # Render breakpoint markers
-    render_regions()
+    #render_regions()
 
 def update_socket_loop():
     if not S.PROTOCOL:
         return
 
-    with S.PROTOCOL as protocol:
-        try:
+    try:
+        with S.PROTOCOL as protocol:
             protocol.update()
-        except ProtocolConnectionException as e:
-            return
-        #    sublime.set_timeout(lambda: sublime.error_message('The connection to client was lost. Restarting SublimeTextGRLD server.'), 0)
-        #    sublime.set_timeout(lambda: sublime.active_window().send_command('grld_session_restart'), 0)
-        #    return
+    except ProtocolConnectionException as e:
+        protocol.disconnect(e)
+        return
 
+    sublime.set_timeout(lambda: sublime.status_message('GRLD: Connected'), 0)
     sublime.set_timeout_async(update_socket_loop, 100)
 
 class SocketHandler(threading.Thread):
@@ -198,9 +190,8 @@ class SocketHandler(threading.Thread):
                 self.set_current_stack_level(self.get_option('selected_thread'))
                 pass
         # Show dialog on connection error
-        except ProtocolConnectionException:
-            e = sys.exc_info()[1]
-            self.timeout(lambda: connection_error("%s" % e))
+        except ProtocolConnectionException as e:
+            self.timeout(lambda: connection_error(e))
         finally:
             S.SESSION_BUSY = False
 
@@ -221,7 +212,6 @@ class SocketHandler(threading.Thread):
 
         self.timeout(lambda: view.run_command('grld_update_evaluate_line_response', {'response': response_str}))
 
-
     def execute(self, command):
         # Do not execute if no command is set
         if not command or not is_connected():
@@ -233,13 +223,14 @@ class SocketHandler(threading.Thread):
         S.CONTEXT_DATA.clear()
         self.watch_expression()
 
-
         # Send command to debugger engine
         with S.PROTOCOL as protocol:
             protocol.send(command)
 
-        self.run_command('grld_layout')
-        self.timeout(lambda: render_regions())
+        if command == grld.RUN:
+            self.run_command('grld_layout')
+
+        #self.timeout(lambda: render_regions())
 
     def get_value(self, grld_id):
         with S.PROTOCOL as protocol:
@@ -363,9 +354,8 @@ class SocketHandler(threading.Thread):
                 response = protocol.read()
                 properties = self.transform_grld_context_response(response, "upvalue")
                 context.update(properties)
-        except ProtocolConnectionException:
-            e = sys.exc_info()[1]
-            self.timeout(lambda: connection_error("%s" % e))
+        except ProtocolConnectionException as e:
+            self.timeout(lambda: connection_error(e))
 
         # Store context variables in session
         S.CONTEXT_DATA = context
@@ -385,9 +375,8 @@ class SocketHandler(threading.Thread):
                     protocol.send("callstack")
                     protocol.send(self.current_thread)
                     response = protocol.read()
-            except ProtocolConnectionException:
-                e = sys.exc_info()[1]
-                self.timeout(lambda: connection_error("%s" % e))
+            except ProtocolConnectionException as e:
+                self.timeout(lambda: connection_error(e))
 
         #response should be something like: {"1": {"name": <name of thing>, "namewhat": (global|local|method|field|''), "what": (Lua, C, main), "source": @<filename>, "line": line in file}}
         return response
@@ -401,8 +390,8 @@ class SocketHandler(threading.Thread):
                 protocol.send(stack_level)
 
                 response = protocol.read()
-        except ProtocolConnectionException:
-            pass
+        except ProtocolConnectionException as e:
+            self.timeout(lambda: connection_error(e))
 
         return response
 
@@ -448,6 +437,8 @@ class SocketHandler(threading.Thread):
 
         update_socket_loop()
 
+        #self.timeout(lambda: render_regions())
+
     def remove_breakpoint(self, filename, lineno):
         if not is_connected():
             return
@@ -466,6 +457,8 @@ class SocketHandler(threading.Thread):
             protocol.send("setbreakpoint", "running")
             protocol.send({"source": fileuri, "line": int(lineno), "value": active}, "running")
 
+        #self.timeout(lambda: render_regions())
+
 
     def set_exception(self, exception):
         if not is_connected():
@@ -477,17 +470,17 @@ class SocketHandler(threading.Thread):
 
 
     def status(self):
-        if not is_connected():
-            return
+        raise NotImplementedError('status is not implemented yet')
+        #if not is_connected():
+        #    return
 
-        with S.PROTOCOL as protocol:
-            # Send 'status' command to debugger engine
-            protocol.send(dbgp.STATUS)
-            response = protocol.read()
+        #with S.PROTOCOL as protocol:
+        #    # Send 'status' command to debugger engine
+        #    protocol.send(dbgp.STATUS)
+        #    response = protocol.read()
 
-        # Show response in status bar
-        self.status_message("GRLD status: " + response.get(dbgp.ATTRIBUTE_REASON) + ' - ' + response.get(dbgp.ATTRIBUTE_STATUS))
-
+        ## Show response in status bar
+        #self.status_message("GRLD status: " + response.get(dbgp.ATTRIBUTE_REASON) + ' - ' + response.get(dbgp.ATTRIBUTE_STATUS))
 
     def user_execute(self, command, args=None):
         if not command or not is_connected():
@@ -521,6 +514,8 @@ class SocketHandler(threading.Thread):
             return
 
         show_content(DATA_WATCH)
+
+        #self.timeout(lambda: render_regions())
 
     def set_current_stack_level(self, stack_level):
         self.current_stack_level = stack_level
@@ -560,7 +555,7 @@ class SocketHandler(threading.Thread):
         self.watch_expression(thread, stack_level)
 
         # Render breakpoint markers
-        self.timeout(lambda: render_regions())
+        #self.timeout(lambda: render_regions())
 
     def handle_break_command(self, filename, line):
         S.SESSION_BUSY = True
@@ -596,6 +591,8 @@ class SocketHandler(threading.Thread):
         self.timeout(lambda: show_content(DATA_STACK, stack_str))
 
         self.update_contextual_data(self.current_thread, self.current_stack_level)
+
+        #self.timeout(lambda: render_regions())
 
         S.SESSION_BUSY = False
 
