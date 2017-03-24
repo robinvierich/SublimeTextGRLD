@@ -200,35 +200,6 @@ class Protocol(object):
         self.listening_canceled_event.set()
 
 
-    def unescape(self, string):
-        """
-        Convert HTML entities and character references to ordinary characters.
-        """
-        def convert(matches):
-            text = matches.group(0)
-            # Character reference
-            if text[:2] == "&#":
-                try:
-                    if text[:3] == "&#x":
-                        return H.unicode_chr(int(text[3:-1], 16))
-                    else:
-                        return H.unicode_chr(int(text[2:-1]))
-                except ValueError:
-                    pass
-            # Named entity
-            else:
-                try:
-                    # Following are not needed to be converted for XML
-                    if text[1:-1] == "amp" or text[1:-1] == "gt" or text[1:-1] == "lt":
-                        pass
-                    else:
-                        text = H.unicode_chr(name2codepoint[text[1:-1]])
-                except KeyError:
-                    pass
-            return text
-        return re.sub("&#?\w+;", convert, string)
-
-
     @assert_locked
     def is_command(self, message):
         if not message:
