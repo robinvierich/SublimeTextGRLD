@@ -316,7 +316,7 @@ class Protocol(object):
                     self.buffer += H.data_read(rawSockData)
 
                     r, _, _ = select.select([self.socket], [], [], 0)
-                    if not r:
+                    if not r or not rawSockData:
                         break
 
             except:
