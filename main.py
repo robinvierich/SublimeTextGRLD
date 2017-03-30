@@ -325,7 +325,7 @@ class GrldSessionStartCommand(sublime_plugin.WindowCommand):
     # note: may be called from a separate thread (not main thread)
     def on_connection_lost(self, exception):
         sublime.set_timeout(lambda: self.window.run_command('grld_session_restart'), 0)
-        sublime.set_timeout(lambda: sublime.error_message('The connection to client was lost. Restarted SublimeTextGRLD server.'), 0)
+        sublime.set_timeout(lambda: sublime.status_message('The connection to client was lost. Restarted SublimeTextGRLD server.'), 0)
 
     def listen(self):
         # Start listening for response from debugger engine
