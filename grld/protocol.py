@@ -289,6 +289,7 @@ class Protocol(object):
                     self.buffer += H.data_read(rawSockData)
 
                     r, _, _ = select.select([self.socket], [], [], 0)
+                    
                     if not r or not rawSockData:
                         break
 
@@ -310,7 +311,25 @@ class Protocol(object):
         # length = self.read_socket_into_buffer()
 
         if len(self.buffer) <= 0:
-            self.read_socket_into_buffer(async)
+
+            can_deserialize_next_message = False
+            tries = 5
+
+            while tries > 0 and not can_deserialize_next_message:
+                try:
+                    self.read_socket_into_buffer(async)
+                    message, _ = self.parse_grld_message(self.buffer)
+                    deserialize(message)
+                    can_deserialize_next_message = True
+                except ProtocolException as e:
+                    tries -= 1
+                    
+                    if tries < 0:
+                        sublime.error_message('Error deserializing message from client:\n{}'.format(str(e)))
+                        raise e
+
+                    time.sleep(0.1)
+
 
         if len(self.buffer) <= 0:
             return None
