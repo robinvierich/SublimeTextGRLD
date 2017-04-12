@@ -8,13 +8,9 @@
         "command": "grld_session_restart"
     },
     {
-        "caption": "GRLD: Stop Debugging",
-        "command": "grld_session_stop"
-    },
-    {
         "caption": "GRLD: Stop Debugging (Close Windows)",
         "command": "grld_session_stop",
-        "args"   : {"close_windows" : true}
+        "args"   : {"close_windows": true}
     },
     {
         "caption": "GRLD: Add/Remove Breakpoint",

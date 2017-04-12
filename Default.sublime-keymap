@@ -6,7 +6,7 @@
 	{"keys": ["f11"], "command": "grld_continue", "args": {"command": "stepin"}, "context": [{"key": "only_while_execution_broken"}]},
 	{"keys": ["shift+f11"], "command": "grld_continue", "args": {"command": "stepout"}, "context": [{"key": "only_while_execution_broken"}]},
 	{"keys": ["ctrl+f5"], "command": "grld_session_start"},
-	{"keys": ["shift+f5"], "command": "grld_session_stop"},
+	{"keys": ["shift+f5"], "command": "grld_session_stop", "args": {"close_windows": true}},
 	{"keys": ["ctrl+shift+f5"], "command": "grld_layout", "args": {"keymap" : true}},
 
 	{"keys": ["enter"], "command": "grld_evaluate_line", "context": [{"key": "evaluate_line"}]}
