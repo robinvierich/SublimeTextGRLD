@@ -5,6 +5,7 @@ import os
 import re
 import sys
 import webbrowser
+import tempfile
 
 # Helper module
 try:
@@ -23,6 +24,10 @@ from .config import get_value
 
 # Log module
 from .log import debug, info
+
+def is_fs_case_sensitive():
+    with tempfile.NamedTemporaryFile(prefix='TmP') as tmp_file:
+        return(not os.path.exists(tmp_file.name.lower()))
 
 def get_real_path(uri, server=False):
     """
@@ -56,9 +61,10 @@ def get_real_path(uri, server=False):
 
     # Pattern for checking if uri is a windows path
     windows_pattern = re.compile('.*\\.*')
+    is_windows_pattern = windows_pattern.match(uri) != None
 
     # Prepend leading slash if filesystem is not Windows
-    if not windows_pattern.match(uri) and not os.path.isabs(uri):
+    if is_windows_pattern and not os.path.isabs(uri):
         uri = os.path.normpath('/' + uri)
 
     path_mapping = get_value(S.KEY_PATH_MAPPING)
@@ -104,6 +110,7 @@ def get_real_path(uri, server=False):
         uri = uri.replace("\\", "/")
         uri = os.path.join("./", uri)
         uri = "@{}".format(uri)
+        uri = uri.lower() if not is_fs_case_sensitive() else uri # <-- Note, lua's path normalize() function returns lowercase paths if fs is case-insensitive (regardless of input)
 
     # Append scheme
     #if server:
