@@ -316,7 +316,8 @@ class GrldSessionStartCommand(sublime_plugin.WindowCommand):
             self.window.active_view().run_command('grld_breakpoint', {'rows': [S.BREAKPOINT_RUN['lineno']], 'filename': S.BREAKPOINT_RUN['filename']})
         S.BREAKPOINT_RUN = None
         # Set debug layout
-        self.window.run_command('grld_layout')
+
+        sublime.set_timeout(lambda: self.window.run_command('grld_layout'), 0)
 
         # Start thread which will run method that listens for response on configured port
         threading.Thread(target=self.listen).start()
@@ -397,11 +398,11 @@ class GrldSessionStopCommand(sublime_plugin.WindowCommand):
         # Close or reset debug layout
         if close_windows or config.get_value(S.KEY_CLOSE_ON_STOP):
             if config.get_value(S.KEY_DISABLE_LAYOUT):
-                self.window.run_command('grld_layout', {'close_windows': True})
+                sublime.set_timeout(lambda: self.window.run_command('grld_layout', {'close_windows': True}), 0)
             else:
-                self.window.run_command('grld_layout', {'restore': True})
+                sublime.set_timeout(lambda: self.window.run_command('grld_layout', {'restore': True}), 0)
         else:
-            self.window.run_command('grld_layout')
+            sublime.set_timeout(lambda: self.window.run_command('grld_layout'), 0)
 
     def is_enabled(self):
         if S.PROTOCOL:
@@ -688,7 +689,7 @@ class GrldLayoutCommand(sublime_plugin.WindowCommand):
     """
     def run(self, restore=False, close_windows=False, keymap=False):
         # Get active window
-        window = sublime.active_window()
+        window = self.window
         # Do not restore layout or close windows while debugging
         if S.PROTOCOL and (restore or close_windows or keymap):
             return
@@ -702,6 +703,19 @@ class GrldLayoutCommand(sublime_plugin.WindowCommand):
         if close_windows or restore or keymap:
             V.close_debug_windows()
             return
+
+        sublime.set_timeout(lambda: self.clear_content(), 100)
+        
+        panel = window.get_output_panel('grld')
+        panel.run_command("grld_view_update")
+        # Close output panel
+        window.run_command('hide_panel', {"panel": 'output.grld'})
+
+        #self.clear_content()
+
+    def clear_content(self):
+        window = self.window
+
         # Reset data in debugging related windows
         V.show_content(V.DATA_BREAKPOINT)
         V.show_content(V.DATA_CONTEXT)
@@ -711,21 +725,15 @@ class GrldLayoutCommand(sublime_plugin.WindowCommand):
 
         # don't override content of evaluate window automatically
         evaluate_content = ''
+        icons_content = ''
         for v in window.views():
             if v.name() == V.TITLE_WINDOW_EVALUATE:
                 evaluate_content = v.substr(sublime.Region(0, v.size()))
-        V.show_content(V.DATA_EVALUATE, evaluate_content)
-
-        icons_content = ''
-        for v in window.views():
             if v.name() == V.TITLE_WINDOW_ICONS:
                 icons_content = v.substr(sublime.Region(0, v.size()))
-        V.show_content(V.DATA_ICONS, icons_content)
 
-        panel = window.get_output_panel('grld')
-        panel.run_command("grld_view_update")
-        # Close output panel
-        window.run_command('hide_panel', {"panel": 'output.grld'})
+        V.show_content(V.DATA_EVALUATE, evaluate_content)
+        V.show_content(V.DATA_ICONS, icons_content)
 
     def is_enabled(self, restore=False, close_windows=False):
         disable_layout = config.get_value(S.KEY_DISABLE_LAYOUT)

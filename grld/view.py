@@ -542,7 +542,8 @@ def show_content(data, content=None):
     view.settings().set('syntax', 'Packages/' + package + '/GRLD.tmLanguage')
 
     # Set content for view and fold all indendation blocks
-    view.run_command('grld_view_update', {'data': content, 'readonly': read_only})
+    window.focus_view(view)
+    view.run_command('grld_view_update', {'data': content, 'readonly': read_only})    
     if data == DATA_CONTEXT or data == DATA_WATCH:
         view.run_command('fold_all')
 

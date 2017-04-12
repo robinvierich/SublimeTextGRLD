@@ -57,7 +57,10 @@ def grld():
     if has_debug_view(TITLE_WINDOW_ICONS):
         show_content(DATA_ICONS)
 
+    # This is admittedly crazy, but the only way I found that made sure that the debug layout wasn't completely black panels (no views/content) on start or end debugging
     sublime.active_window().run_command('grld_layout', {'restore': True})
+    sublime.active_window().run_command('grld_layout', {'close_windows': True})
+    sublime.active_window().set_layout(S.LAYOUT_NORMAL)
 
     # Check for conflicting packages
     if S.PACKAGE_FOLDER:
