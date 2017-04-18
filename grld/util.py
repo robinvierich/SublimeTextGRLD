@@ -64,7 +64,7 @@ def get_real_path(uri, server=False):
     is_windows_pattern = windows_pattern.match(uri) != None
 
     # Prepend leading slash if filesystem is not Windows
-    if is_windows_pattern and not os.path.isabs(uri):
+    if not is_windows_pattern and not os.path.isabs(uri):
         uri = os.path.normpath('/' + uri)
 
     path_mapping = get_value(S.KEY_PATH_MAPPING)
