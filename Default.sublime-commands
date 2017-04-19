@@ -114,14 +114,14 @@
         "caption": "Preferences: GRLD Settings",
         "command": "edit_settings",
         "args"   : {
-            "base_file" : "${packages}/SublimeTextGRLD/GRLD.sublime-settings"
+            "base_file" : "${packages}/GRLD/GRLD.sublime-settings"
         }
     },
     {
         "caption": "Preferences: GRLD Key Bindings",
         "command": "edit_settings",
         "args"   : {
-            "base_file" : "${packages}/SublimeTextGRLD/Default.sublime-keymap"
+            "base_file" : "${packages}/GRLD/Default.sublime-keymap"
         }
     }
 ]
