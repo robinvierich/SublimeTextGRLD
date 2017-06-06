@@ -86,6 +86,9 @@
     <Compile Include="grld\net\net_worker.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="grld\net\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="grld\path_helpers.py">
       <SubType>Code</SubType>
     </Compile>
@@ -96,6 +99,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="grld\shared_data.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\startup.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="grld\ui_commands.py">
