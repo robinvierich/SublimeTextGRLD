@@ -1,8 +1,8 @@
 import time
 
-from shared_collections import net_request_transaction_queue, unhandled_grld_push_command_queue, unhandled_responses
+from grld.shared_data import net_request_transaction_queue, unhandled_grld_push_command_queue, unhandled_responses
 from grld_server import GrldServer, GrldServerException
-from grld_net import Channels
+from grld_channels import GrldChannels
 
 class NetworkException(BaseException):
     pass
@@ -38,7 +38,7 @@ class NetWorker(threading.Thread):
         t = time.clock()
         if (t - self.last_check_time) >= KEEP_ALIVE_INTERVAL: # need to rate-limit this so we don't flood the network
             self.last_keep_alive_time = t
-            self.send('', Channels.KEEP_ALIVE)
+            self.send('', GrldChannels.KEEP_ALIVE)
 
 
     def run():
@@ -85,10 +85,10 @@ class NetWorker(threading.Thread):
                     # handling this here because we need to respond immediately
 
                     # synchronize expects us to return the # of active breakpoints (this is actually not implemented, we MUST return 0 here)
-                    self.grld_server.send(0, Channels.PAUSED)
+                    self.grld_server.send(0, GrldChannels.PAUSED)
 
                     # next we need to send the "breakOnConnection" value, this is configurable, but we'll just always return false for now
-                    self.grld_server.send(False, Channels.PAUSED)
+                    self.grld_server.send(False, GrldChannels.PAUSED)
 
                 else:
                     response_messages.append(message)

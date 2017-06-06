@@ -1,2 +1,4 @@
 *.pyc
 *.tmLanguage.cache
+.vs/SublimeTextGRLD/v14/.suo
+.vs/Xdebug Client/v14/.suo

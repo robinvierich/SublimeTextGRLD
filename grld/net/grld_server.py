@@ -1,7 +1,7 @@
 import socket
 import select
 
-from grld_comm_protocol_helpers import *
+from grld_protocol_helpers import *
 
 class ConnectionState:
     DISCONNECTED = 0

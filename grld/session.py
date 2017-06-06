@@ -328,39 +328,7 @@ class SocketHandler(threading.Thread):
         return self.transform_grld_eval_response(context_response, scope)
 
 
-    def get_context_values(self, thread, stack_level):
-        """
-        Get variables in current context.
-        """
-        if not is_connected():
-            return
-
-        context = H.new_dictionary()
-        try:
-            # local variables
-            #if get_value(S.KEY_SUPER_GLOBALS):
-            with S.PROTOCOL as protocol:
-                protocol.send("locals")
-                protocol.send(thread)
-                protocol.send(stack_level)
-                response = protocol.read()
-                properties = self.transform_grld_context_response(response, "local")
-                context.update(properties)
-
-                # upvalues
-                protocol.send("upvalues")
-                protocol.send(thread)
-                protocol.send(stack_level)
-                response = protocol.read()
-                properties = self.transform_grld_context_response(response, "upvalue")
-                context.update(properties)
-        except ProtocolConnectionException as e:
-            self.timeout(lambda: connection_error(e))
-
-        # Store context variables in session
-        S.CONTEXT_DATA = context
-
-        return generate_context_output(context)
+    
 
 
     def get_stack_values(self):

@@ -21,6 +21,86 @@
     <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="grld\breakpoint.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\commands\add_breakpoint.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\commands\evaluate_expression.py" />
+    <Compile Include="grld\commands\get_coroutines.py" />
+    <Compile Include="grld\commands\get_current_thread.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\commands\get_locals.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\commands\get_stack.py" />
+    <Compile Include="grld\commands\get_upvalues.py" />
+    <Compile Include="grld\commands\pause.py" />
+    <Compile Include="grld\commands\remove_breakpoint.py" />
+    <Compile Include="grld\commands\resume.py" />
+    <Compile Include="grld\commands\step_in.py" />
+    <Compile Include="grld\commands\step_out.py" />
+    <Compile Include="grld\commands\step_over.py" />
+    <Compile Include="grld\commands\__init__.py" />
+    <Compile Include="grld\lua_stack.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\lua_stack_frame.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\main_new.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\net\grld_channels.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\net\grld_command_names.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\net\net_commands.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\command_worker.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\debugger_state.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\id_generator.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\net\net_request.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\lua_execution_state.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\net\grld_server.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\net\grld_protocol_helpers.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\net\net_worker.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\path_helpers.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\push_command_handlers\break.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\response_formatting.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\shared_data.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="grld\ui_commands.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="main.py" />
     <Compile Include="plugin_helpers\reloader.py">
       <SubType>Code</SubType>
@@ -46,6 +126,9 @@
     <Compile Include="grld\util.py" />
     <Compile Include="grld\view.py" />
     <Compile Include="grld\__init__.py" />
+    <Compile Include="profiling.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
@@ -64,6 +147,9 @@
     <Content Include="GRLD.tmLanguage" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="grld\commands\" />
+    <Folder Include="grld\net\" />
+    <Folder Include="grld\push_command_handlers\" />
     <Folder Include="icons" />
     <Folder Include="plugin_helpers\" />
     <Folder Include="grld" />

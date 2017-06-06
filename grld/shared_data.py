@@ -27,6 +27,6 @@ net_request_transaction_queue = queue.Queue()
 unhandled_responses = SynchronizedDict()
 unhandled_grld_push_command_queue = queue.Queue()
 
-ui_update_queue = queue.Queue()
+debugger_state_update_queue = queue.Queue()
 
 

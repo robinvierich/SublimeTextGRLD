@@ -1,7 +1,13 @@
 from collections import OrderedDict
 
-from grld_net import send_request, block_for_response, Channels, RequestTransaction
-from grld_command_helpers import GrldCommandNames, create_breakpoint_request_data
+from net_request import RequestTransaction
+from grld_channels import GrldChannels
+from grld_command_names import GrldCommandNames
+
+
+def create_breakpoint_request_data(source_filename, lineno, active):
+    return {"source": source_filename, "line": int(lineno), "value": active}
+
 
 def set_breakpoint(local_path, lineno, active):
     """
@@ -15,8 +21,8 @@ def set_breakpoint(local_path, lineno, active):
     breakpoint_request_data = create_breakpoint_request_data(grld_path, lineno, active)
     
     transaction = RequestTransaction()
-    transaction.add_request(GrldCommandNames.SET_BREAKPOINT, Channels.RUNNING)
-    transaction.add_request(breakpoint_request_data, Channels.RUNNING)
+    transaction.add_request(GrldCommandNames.SET_BREAKPOINT, GrldChannels.RUNNING)
+    transaction.add_request(breakpoint_request_data, GrldChannels.RUNNING)
 
 
 def add_breakpoint(local_path, lineno):
@@ -95,6 +101,14 @@ def get_coroutines():
     # always include a 'main' coroutine. This is how GRLD references the main Lua thread (but it's not returned explicitly from a 'coroutines' query)
     count = len(response.keys()) 
     response[count + 1] = {'id': 'main'}
+
+    return response
+
+
+def get_current_thread():
+    transaction = RequestTransaction()
+    transaction.add_request(GrldCommandNames.GET_CURRENT_THREAD)
+    response = transaction.send_and_block_for_response()
 
     return response
 
