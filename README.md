@@ -1,6 +1,6 @@
 # SublimeTextGRLD
 
-#### Note: This package is still early in development and will likely contain bugs. It has only been tested on Windows with a single lua application.
+## Note: This package is still early in development and is very unstable! A rewrite of the entire codebase is in progress.
 
 [GRLD](https://github.com/neuoy/GRLD) debugger client integration for Sublime Text 3.
 
