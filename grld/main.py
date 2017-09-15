@@ -1,7 +1,7 @@
 import sublime
 import sublime_plugin
 
-from debugger_state import does_breakpoint_exist
+from grld.state.debugger_state import does_breakpoint_exist
 from shared_data import command_queue, get_immutable_debugger_state
 
 from grld.commands.add_breakpoint import AddBreakpointCommand
@@ -9,6 +9,16 @@ from grld.commands.add_breakpoint import AddBreakpointCommand
 from grld.command_worker import CommandWorker
 from grld.view.view_update_worker import ViewUpdateWorker
 from grld.net.net_worker import NetWorker
+
+
+from grld.view.breakpoints_view import BreakpointsView
+from grld.view.evaluate_view import EvaluateView
+from grld.view.gutter_view import GutterView
+from grld.view.stack_view import StackView
+from grld.view.context_view import ContextView
+from grld.view.watch_view import WatchView
+
+from grld.view.layout import debug_layout, debug_layout_view_data
 
 
 def get_local_path_for_breakpoint(view):
@@ -36,18 +46,43 @@ def get_lineno_for_breakpoint(view):
 
 
 class GrldPlugin:
-    def __init__():
+    def __init__(self, window):
+        self.window = window
+        self.initial_layout = window.get_layout()
+
+    def start(self):
+        self.window.set_layout(debug_layout)
+
         self.net_worker = NetWorker()
         self.command_worker = CommandWorker()
         self.view_update_worker = ViewUpdateWorker()
 
-    def start(self):
+        self.view_update_worker.add_view(BreakpointsView(debug_layout_view_data))
+        self.view_update_worker.add_view(EvaluateView(debug_layout_view_data))
+        self.view_update_worker.add_view(GutterView(debug_layout_view_data))
+        self.view_update_worker.add_view(StackView(debug_layout_view_data))
+        self.view_update_worker.add_view(ContextView(debug_layout_view_data))
+        self.view_update_worker.add_view(WatchView(debug_layout_view_data))
+
         self.net_worker.start()
         self.command_worker.start()
         self.view_update_worker.start()
 
+    def stop(self):
+        self.window.set_layout(self.initial_layout)
 
-grld_plugin = GrldPlugin()
+        self.net_worker.stop()
+        self.command_worker.stop()
+        self.view_update_worker.stop()
+
+        self.net_worker.join()
+        self.command_worker.join()
+        self.view_update_worker.join()
+
+
+
+
+grld_plugin = GrldPlugin(sublime.active_window())
 grld_plugin.start()
 
 
