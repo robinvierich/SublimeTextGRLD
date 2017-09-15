@@ -1,9 +1,7 @@
 import threading
 import time
 
-from copy import deepcopy
-
-from shared_data import command_queue, debugger_state_update_queue, debugger_state, unhandled_grld_push_command_queue
+from shared_data import command_queue, debugger_state_update_queue, copy_debugger_state, unhandled_grld_push_command_queue
 
 class CommandWorker(threading.Thread):
     def __init__(self, *args, **kwargs):
@@ -14,21 +12,22 @@ class CommandWorker(threading.Thread):
 
         while True:
             # TODO: error handling
-
-            with debugger_state:
-                debugger_state = deepcopy(debugger_state)
+            debugger_state_updates = None
 
             command = command_queue.get_nowait()
             if command:
                 # TODO: this currently only works because net_commands block.
                 #       For perf, it'd be better to have async net requests eventually
-                modified_debugger_state = command.execute(working_debugger_state)
+
+                debugger_state_updates = copy_debugger_state()
+                debugger_state_updates = command.execute(debugger_state)
 
             unhandled_grld_push_command = unhandled_grld_push_command_queue.get_nowait()
             if unhandled_grld_push_command:
-                modified_debugger_state = unhandled_grld_push_command.execute(modified_debugger_state)
+                debugger_state_updates = unhandled_grld_push_command.execute(debugger_state_updates)
 
-            debugger_state_update_queue.put(modified_debugger_state)
+            if debugger_state_updates:
+                debugger_state_update_queue.put(debugger_state_updates)
 
             time.sleep(0.1)
 

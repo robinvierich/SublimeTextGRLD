@@ -2,9 +2,13 @@ import sublime
 import sublime_plugin
 
 from debugger_state import does_breakpoint_exist
-from shared_data import command_queue, debugger_state
+from shared_data import command_queue, get_immutable_debugger_state
 
 from grld.commands.add_breakpoint import AddBreakpointCommand
+
+from grld.command_worker import CommandWorker
+from grld.view.view_update_worker import ViewUpdateWorker
+from grld.net.net_worker import NetWorker
 
 
 def get_local_path_for_breakpoint(view):
@@ -31,6 +35,22 @@ def get_lineno_for_breakpoint(view):
         return rows[-1]
 
 
+class GrldPlugin:
+    def __init__():
+        self.net_worker = NetWorker()
+        self.command_worker = CommandWorker()
+        self.view_update_worker = ViewUpdateWorker()
+
+    def start(self):
+        self.net_worker.start()
+        self.command_worker.start()
+        self.view_update_worker.start()
+
+
+grld_plugin = GrldPlugin()
+grld_plugin.start()
+
+
 class GrldBreakpointCommand(sublime_plugin.TextCommand):
     """
     Add/Remove breakpoint(s) for rows (line numbers) in selection.
@@ -38,6 +58,8 @@ class GrldBreakpointCommand(sublime_plugin.TextCommand):
     def run(self, edit, rows=None, condition=None, enabled=None, filename=None):
         local_path = get_local_path_for_breakpoint(self.view)
         lineno = get_lineno_for_breakpoint(self.view)
+
+        debugger_state = get_immutable_debugger_state()
 
         breakpoint_exists = does_breakpoint_exist(debugger_state, local_path, lineno)
 
