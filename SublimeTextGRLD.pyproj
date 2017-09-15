@@ -107,6 +107,13 @@
     <Compile Include="grld\ui_commands.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="grld\view\breakpoints_view.py" />
+    <Compile Include="grld\view\evaluate_view.py" />
+    <Compile Include="grld\view\gutter_view.py" />
+    <Compile Include="grld\view\layout.py" />
+    <Compile Include="grld\view\stack_view.py" />
+    <Compile Include="grld\view\view_update_worker.py" />
+    <Compile Include="grld\view\watch_view.py" />
     <Compile Include="main.py" />
     <Compile Include="plugin_helpers\reloader.py">
       <SubType>Code</SubType>
@@ -155,6 +162,7 @@
   <ItemGroup>
     <Folder Include="grld\commands\" />
     <Folder Include="grld\net\" />
+    <Folder Include="grld\view\" />
     <Folder Include="grld\push_command_handlers\" />
     <Folder Include="icons" />
     <Folder Include="plugin_helpers\" />

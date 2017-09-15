@@ -5,10 +5,10 @@ class GetUpvaluesCommand:
         pass
 
     def execute(self, debugger_state):
-        lua_execution_state = debugger_state.lua_execution_state
+        lua_execution_state = debugger_state['lua_execution_state']
 
-        upvalues = get_upvalues(lua_execution_state.current_thread, lua_execution_state.current_stack_level)
+        upvalues = get_upvalues(lua_execution_state['current_thread'], lua_execution_state['current_stack_level'])
 
-        lua_execution_state.upvalues = upvalues
+        lua_execution_state['upvalues'] = upvalues
 
         return debugger_state

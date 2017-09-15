@@ -14,14 +14,14 @@ class GetCurrentThreadCommand:
 
         selected_coroutine = None
 
-        for coroutine in debugger_state_with_latest_coroutines.lua_execution_state.coroutines:
-            if coroutine.id == current_thread:
+        for coroutine in debugger_state_with_latest_coroutines['lua_execution_state']['coroutines']:
+            if coroutine['id'] == current_thread:
                 selected_coroutine = coroutine
                 break
 
         if not selected_coroutine:
             selected_coroutine = 'main'
 
-        debugger_state_with_latest_coroutines.lua_execution_state.current_thread = selected_coroutine
+        debugger_state_with_latest_coroutines['lua_execution_state']['current_thread'] = selected_coroutine
 
         return debugger_state_with_latest_coroutines

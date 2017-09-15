@@ -15,11 +15,11 @@ class BreakPushCommandHandler:
         pass
 
     def handle(self, debugger_state, grld_file_path, lineno):
-        
-        debugger_state.last_break_time = time.clock()
-        #lua_execution_state = debugger_state.lua_execution_state
-        #lua_execution_state.current_local_file_path = get_local_path(grld_file_path)
-        #lua_execution_state.current_lineno = lineno
+
+        debugger_state['last_break_time'] = time.clock()
+        #lua_execution_state = debugger_state['lua_execution_state']
+        #lua_execution_state['current_local_file_path'] = get_local_path(grld_file_path)
+        #lua_execution_state['current_lineno'] = lineno
 
         command_queue.put(GetCoroutinesCommand())
         command_queue.put(GetStackCommand())

@@ -1,8 +1,8 @@
 import sublime
 import sublime_plugin
 
-from debugger_state import DebuggerState
-from shared_data import command_queue
+from debugger_state import does_breakpoint_exist
+from shared_data import command_queue, debugger_state
 
 from grld.commands.add_breakpoint import AddBreakpointCommand
 
@@ -39,7 +39,7 @@ class GrldBreakpointCommand(sublime_plugin.TextCommand):
         local_path = get_local_path_for_breakpoint(self.view)
         lineno = get_lineno_for_breakpoint(self.view)
 
-        breakpoint_exists = ui_debugger_state.does_breakpoint_exist(local_path, lineno)
+        breakpoint_exists = does_breakpoint_exist(debugger_state, local_path, lineno)
 
         if breakpoint_exists:
             remove_breakpoint_command = RemoveBreakpointCommand()
@@ -63,12 +63,12 @@ class GrldBreakpointCommand(sublime_plugin.TextCommand):
 #            if view.id() == code_view_id:
 #                code_view = view
 #                break
-        
+
 #        if not code_view:
 #            return
 
 #        num_code_lines = len(code_view.lines(sublime.Region(0, code_view.size())))
-        
+
 #        newlines_str = ' \n' * (num_code_lines - 1)
 
 #        self.view.set_read_only(False)
@@ -563,7 +563,7 @@ class GrldLayoutCommand(sublime_plugin.WindowCommand):
             return
 
         sublime.set_timeout(lambda: self.clear_content(), 100)
-        
+
         panel = window.get_output_panel('grld')
         panel.run_command("grld_view_update")
         # Close output panel

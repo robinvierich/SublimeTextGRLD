@@ -7,6 +7,6 @@ class GetCoroutinesCommand:
     def execute(self, debugger_state):
         coroutines = get_coroutines()
 
-        lua_execution_state.coroutines = coroutines
+        lua_execution_state['coroutines'] = coroutines
 
         return debugger_state
