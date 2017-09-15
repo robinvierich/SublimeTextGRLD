@@ -1,7 +1,7 @@
 import time
 
 from grld.id_generator import IdGenerator
-from grld.shared_data import unhandled_responses
+from grld.shared_data import unhandled_responses_sync_dict, net_request_transaction_queue
 
 from grld_command_names import GrldCommandNames
 
@@ -60,7 +60,7 @@ class RequestTransaction:
     @error_if_sent
     def send(self):
         self.sent = True
-        request_transaction_queue.append(self)
+        net_request_transaction_queue.append(self)
         return self.id
 
 
@@ -74,7 +74,7 @@ class RequestTransaction:
 
     def block_for_response(self):
         while True:
-            response = unhandled_responses.get(self.id)
+            response = unhandled_responses_sync_dict.get(self.id)
             if response: break
             time.sleep(0.1)
 

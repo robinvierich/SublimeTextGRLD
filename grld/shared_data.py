@@ -26,7 +26,7 @@ command_queue = queue.Queue()
 net_request_transaction_queue = queue.Queue()
 
 # a queue of data pushed/returned from the GRLD client (i.e. the game/application running Lua)
-unhandled_responses = SynchronizedDict()
+unhandled_responses_sync_dict = SynchronizedDict()
 unhandled_grld_push_command_queue = queue.Queue()
 
 # a queue of updates to the debugger state

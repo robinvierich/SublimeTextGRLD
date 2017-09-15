@@ -1,6 +1,6 @@
 import time
 
-from grld.shared_data import net_request_transaction_queue, unhandled_grld_push_command_queue, unhandled_responses
+from grld.shared_data import net_request_transaction_queue, unhandled_grld_push_command_queue, unhandled_responses_sync_dict
 from grld_server import GrldServer, GrldServerException
 from grld_channels import GrldChannels
 
@@ -94,7 +94,7 @@ class NetWorker(threading.Thread):
 
                 i += 1
 
-            unhandled_responses.set(transaction.id, response_messages)
+            unhandled_responses_sync_dict.set(transaction.id, response_messages)
 
 
 
@@ -110,4 +110,4 @@ class NetResponseWorker(threading.Thread):
 
             is_response
 
-            unhandled_responses.set(response.id, response)
+            unhandled_responses_sync_dict.set(response.id, response)
