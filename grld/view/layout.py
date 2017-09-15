@@ -5,21 +5,21 @@
         ## gutter
         ##  ##
         ##############################################################################  ### row 0
-        ##  ##                                                                          ##
-        ##  ##                                                                          ##
-        ##  ##                                                                          ##
-        ##  ##                                                                          ##
-        ##  ##                                    main                                  ##
-        ##  ##                                                                          ##
-        ##  ##                                                                          ##
-        ##  ##                                                                          ##
-        ##  ##                                                                          ##
-        ##  ##                                                                          ##
-        ##  ##                                                                          ##
-        ##  ##                                                                          ##
-        ##  ##                                                                          ##
-        ##  ##                                                                          ##
-        ##  ##                                                                          ##
+        ##  ##                                                                      ##
+        ##  ##                                                                      ##
+        ##  ##                                                                      ##
+        ##  ##                                                                      ##
+        ##  ##                                    main                              ##
+        ##  ##                                                                      ##
+        ##  ##                                                                      ##
+        ##  ##                                                                      ##
+        ##  ##                                                                      ##
+        ##  ##                                                                      ##
+        ##  ##                                                                      ##
+        ##  ##                                                                      ##
+        ##  ##                                                                      ##
+        ##  ##                                                                      ##
+        ##  ##                                                                      ##
         ##############################################################################  ### row 1
         ##                   ##                          ##                         ##
         ##    coroutines     ##          context         ##       stack             ##
@@ -83,23 +83,37 @@ debug_layout = {
     ]
 },
 
-debug_layout_groups = {
-    "gutter_index": 0,
-    "gutter_group": 0,
+debug_layout_view_data = {
+    "gutter": {
+        "index": 0,
+        "group": 0,
+    },
 
-    "coroutines_group": 2,
-    "coroutines_index": 0,
+    "coroutines": {
+        "group": 2,
+        "index": 0,
+    },
 
-    "context_group": 3,
-    "context_index": 0,
-    "watch_group": 3,
-    "watch_index": 1,
-    "evaluate_group": 3,
-    "evaluate_index": 3,
+    "context": {
+        "group": 3,
+        "index": 0,
+    },
+    "watch": {
+        "group": 3,
+        "index": 1,
+    },
+    "evaluate": {
+        "group": 3,
+        "index": 3,
+    },
 
-    "stack_group": 4,
-    "stack_index": 0,
-    "breakpoint_group": 4,
-    "breakpoint_index": 1,
+    "stack": {
+        "group": 4,
+        "index": 0,
+    },
+    "breakpoint": {
+        "group": 4,
+        "index": 1,
+    },
 }
 

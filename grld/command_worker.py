@@ -5,12 +5,16 @@ from shared_data import command_queue, debugger_state_update_queue, copy_debugge
 
 class CommandWorker(threading.Thread):
     def __init__(self, *args, **kwargs):
+        self.__stop = False
         return super().__init__(*args, **kwargs)
 
-    def run():
+    def stop(self):
+        self.__stop = True
+
+    def run(self):
         # TODO: don't even allow this to run if we're not connected?
 
-        while True:
+        while not self.__stop:
             # TODO: error handling
             debugger_state_updates = None
 

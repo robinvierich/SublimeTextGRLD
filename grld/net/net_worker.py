@@ -30,6 +30,8 @@ class NetWorker(threading.Thread):
         self.grld_server = GrldServer()
         self.last_keep_alive_time = 0
 
+        self.__stop = False
+
         return super().__init__(*args, **kwargs)
 
 
@@ -39,9 +41,11 @@ class NetWorker(threading.Thread):
             self.last_keep_alive_time = t
             self.send('', GrldChannels.KEEP_ALIVE)
 
+    def stop(self):
+        self.__stop = True
 
-    def run():
-        while True:
+    def run(self):
+        while not self.__stop:
             if not self.grld_server.is_connected():
                 try:
                     self.grld_server.listen()
@@ -95,19 +99,3 @@ class NetWorker(threading.Thread):
                 i += 1
 
             unhandled_responses_sync_dict.set(transaction.id, response_messages)
-
-
-
-class NetResponseWorker(threading.Thread):
-    def __init__(self, *args, **kwargs):
-        return super().__init__(*args, **kwargs)
-
-    def run():
-        while True:
-            read_data = net_read_queue.get()
-
-            # parse response
-
-            is_response
-
-            unhandled_responses_sync_dict.set(response.id, response)
