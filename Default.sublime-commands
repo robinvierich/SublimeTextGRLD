@@ -47,11 +47,11 @@
         "command": "grld_watch",
         "args"   : {"clear" : true}
     },
-	{
+    {
         "caption": "GRLD: Session - Evaluate Line",
         "command": "grld_evaluate_line"
     },
-	{
+    {
         "caption": "GRLD: Session - Update Evaluate Line Response",
         "command": "grld_update_evaluate_line_response"
     },
@@ -96,10 +96,10 @@
         "command": "grld_continue",
         "args"   : {"command" : "detach"}
     },
-	{
-		"caption": "GRLD: Render Icons (breakpoints, etc.)",
-		"command": "grld_render_icons"
-	},
+    {
+        "caption": "GRLD: Render Icons (breakpoints, etc.)",
+        "command": "grld_render_icons"
+    },
     {
         "caption": "GRLD: Close Windows",
         "command": "grld_layout",

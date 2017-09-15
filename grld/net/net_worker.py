@@ -26,12 +26,11 @@ class GrldBreakPushCommand:
         self.lineno = lineno
 
 class NetWorker(threading.Thread):
-    def __init__(self, *args):
-
+    def __init__(self, *args, **kwargs):
         self.grld_server = GrldServer()
         self.last_keep_alive_time = 0
 
-        return super().__init__(*args)
+        return super().__init__(*args, **kwargs)
 
 
     def send_keep_alive(self):
@@ -63,7 +62,7 @@ class NetWorker(threading.Thread):
                 except:
                     raise # TODO: What do we do if we fail to send data to the GRLD client?
 
-            
+
             messages = self.grld_server.read()
             while not messages and transaction.expects_response:
                 time.sleep(0.1)
@@ -100,6 +99,9 @@ class NetWorker(threading.Thread):
 
 
 class NetResponseWorker(threading.Thread):
+    def __init__(self, *args, **kwargs):
+        return super().__init__(*args, **kwargs)
+
     def run():
         while True:
             read_data = net_read_queue.get()

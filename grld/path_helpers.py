@@ -15,11 +15,11 @@ def is_fs_case_sensitive():
 
 
 #def url_decode(uri):
-#	return unquote(uri)
+#    return unquote(uri)
 
 
 #def url_encode(uri):
-#	return quote(uri)
+#    return quote(uri)
 
 
 def get_abs_decoded_path(path):
@@ -40,13 +40,13 @@ def resolve_path_mapping(path, is_local_path=False):
     resolved_path = nil
 
     path_mapping = get_value(S.KEY_PATH_MAPPING)
-   
+
     if not isinstance(path_mapping, dict):
         return path
 
     found_path_mapping = False
     found_parent_path_mapping = False
-        
+
     for grld_path, local_path in path_mapping.items():
         grld_path = os.path.normpath(grld_path)
         local_path = os.path.normpath(local_path)
@@ -59,7 +59,7 @@ def resolve_path_mapping(path, is_local_path=False):
             resolved_path = path.replace(local_path, grld_path)
             found_path_mapping = True
             break
-            
+
         if not found_path_mapping:
             if is_local_path:
                 found_parent_path_mapping = local_path in path
